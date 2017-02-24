@@ -1,0 +1,21 @@
+{
+  "name": "retrogames",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Sergii Solonar <sergeysolonar@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "express": "^4.14.1",
+    "mongoose": "^4.8.4",
+    "morgan": "^1.8.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-core": "^6.23.1",
+    "babel-preset-es2015": "^6.22.0"
+  },
+  "scripts": {
+    "api":"babel-node server.js"
+  }
+}
