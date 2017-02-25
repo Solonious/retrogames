@@ -319,6 +319,42 @@ Finally, we also gotta edit `package.json` to include new scripts commands:
 
 ```javascript
 "start": "NODE_ENV=development webpack-dev-server",
- "build": "NODE_ENV=build webpack"
+"build": "NODE_ENV=build webpack"
  ```
- 
+##Assets
+
+In `/client/dist` create a file `index.html` and paste the following code:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Retrogames Archive</title>
+    <link rel="icon" href="https://cdn.filestackcontent.com/S0zeyXxRem6pL6tHq9pz">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="content"></div>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://api.filestackapi.com/filestack.js"></script>
+    <script src="./bundle.js"></script>
+  </body>
+</html>
+```
+##React
+
+Our routes configuration is composed by two main routes with their children routes:
+
+>The Homepage is a route with three children routes in charge to render the components related to home, features and contacts links.
+
+>The Games route handles the children routes to list the games and add a new one.
+
+Let's install `react packages`
+```bash
+>yarn add react react-dom react-router
+
+```
