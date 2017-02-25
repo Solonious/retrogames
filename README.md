@@ -120,7 +120,7 @@ const gameSchema = new Schema(
 // We export the schema to use it anywhere else
 export default mongoose.model('Game', gameSchema);
 ```
-##ROUTES CALLBACKS
+##Routes callbacks
 
 Create the `game.js` file in `/client/app/routes` and paste the following code:
 
@@ -356,5 +356,96 @@ Our routes configuration is composed by two main routes with their children rout
 Let's install `react packages`
 ```bash
 >yarn add react react-dom react-router
+```
 
+Creating a file `index.js` in `/client/src` and past the following code:
+
+```javascript
+import '../dist/css/style.css';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import Routes from './routes';
+
+// Don't forget to add your API key
+filepicker.setKey("YOUR_API_KEY");
+
+// Our views are rendered inside the #content div
+ReactDOM.render(
+  Routes,
+  document.getElementById('content')
+);
+```
+
+>REMEMBER You should have own `apiKey` from [`Filestack`](https://dev.filestack.com)  
+
+##Routes
+
+Create `routes.js` in `/client/src` and paste the following code:
+```jsx harmony
+import React from 'react';
+import { Router, Route, hashHistory, IndexRoute } from 'react-router';
+import { Home, Welcome, About, Contact } from './components';
+
+// Use hashHistory for easier development
+const routes = (
+  <Router history={hashHistory}>
+    <Route path="/" component={Home}>
+      <IndexRoute component={Welcome} />
+      <Route path="/about" component={About} />
+      <Route path="/contact" component={Contact} />
+    </Route>
+  </Router>
+);
+
+export default routes;
+```
+####URL paths structure:
+| Url | Component |
+|---|---|
+| / | Home -> Welcome |
+| /about | Home -> About |
+| /contact | Home -> Contact |
+
+##Components
+###Home.jsx
+
+in `/client/src/components` create a file `Home.jsx` and paste the following code:
+
+```jsx harmony
+import React, { PureComponent } from 'react';
+import { Link } from 'react-router';
+
+export default class Home extends PureComponent {
+  active (path) {
+    // Returns active when the path is equal to the current location
+    if (this.props.location.pathname === path) {
+      return 'active';
+    }
+  }
+  render () {
+    return (
+      <div className="main">
+        <div className="site-wrapper">
+          <div className="site-wrapper-inner">
+            <div className="cover-container">
+              <div className="masthead clearfix">
+                <div className="inner">
+                  <nav>
+                    <img className="header-logo" src="https://cdn.filestackcontent.com/nLnmrZQaRpeythR4ezUo"/>
+                    <ul className="nav masthead-nav">
+                      <li className={this.active('/')}><Link to="/">Home</Link></li>
+                      <li className={this.active('/about')}><Link to="/about">About</Link></li>
+                      <li className={this.active('/contact')}><Link to="/contact">Contact</Link></li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
+              {this.props.children}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
 ```
