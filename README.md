@@ -399,12 +399,6 @@ const routes = (
 
 export default routes;
 ```
-####URL paths structure:
-| Url | Component |
-|---|---|
-| / | Home -> Welcome |
-| /about | Home -> About |
-| /contact | Home -> Contact |
 
 ##Components
 ###Home.jsx
