@@ -181,3 +181,144 @@ const deleteGame = (req, res) => {
 // We export our functions to be used in the server routes
 export { getGames, getGame, postGame, deleteGame };
 ```
+##Client side
+Installing `webpack`
+
+```bash
+>yarn add webpack webpack-dev-server webpack-merge webpack-validator --dev
+>yarn add babel-preset-react babel-loader react-hot-loader style-loader css-loader file-loader --dev
+>yarn add react-hot-loader@3.0.0-beta.6 --dev
+```
+Let's create `webpack-paths.js` and paste the following code:
+
+```javascript
+"use strict";
+
+const path = require('path');
+// We define some paths to be used throughout the webpack config
+module.exports = {
+  src: path.join(__dirname, 'client/src'),
+  dist: path.join(__dirname, 'client/dist'),
+  css: path.join(__dirname, 'client/dist/css')
+};
+```
+
+Let's move on and create the `webpack.config.js` file and paste the following code:
+
+```javascript
+"use strict";
+
+const merge = require('webpack-merge');
+const validate = require('webpack-validator');
+
+const PATHS = require('./webpack-paths');
+const loaders = require('./webpack-loaders');
+
+const common = {
+    entry: { // The entry file is index.js in /client/src
+        app: PATHS.src 
+    },
+    output: { // The output defines where the bundle output gets created
+        path: PATHS.dist,
+        filename: 'bundle.js'
+    },
+    module: { 
+        loaders: [
+          loaders.babel, // Transpiler
+          loaders.css, // Our bundle will contain the css 
+          loaders.font, // Load fonts
+        ]
+    },
+    resolve: {
+        extensions: ['', '.js', '.jsx'] // the extensions to resolve
+    }
+};
+
+let config;
+// The switch defines the different configuration as development requires webpack-dev-server
+switch(process.env.NODE_ENV) {
+    case 'build':
+        config = merge(
+            common,
+            { devtool: 'source-map' } // SourceMaps on separate file
+         );
+        break;
+    case 'development':
+        config = merge(
+            common,
+            { devtool: 'eval-source-map' }, // Default value
+            loaders.devServer({
+                host: process.env.host,
+                port: 3000
+            })
+        );
+}
+
+// We export the config
+module.exports = validate(config);
+```
+Let's create `webpack-loaders.js` and paste the following code:
+```javascript
+"use strict";
+
+const webpack = require('webpack');
+const PATHS = require('./webpack-paths');
+
+exports.devServer = function(options) {
+    return {
+        devServer:{
+            historyApiFallback: true,
+            hot: true, // Enable hot module
+            inline: true,
+            stats: 'errors-only',
+            host: options.host, // http://localhost
+            port: options.port, // 3000
+            contentBase: './client/dist',
+        },
+        // Enable multi-pass compilation for enhanced performance
+        plugins: [ // Hot module
+            new webpack.HotModuleReplacementPlugin({
+                multistep: true
+            })
+        ]
+    };
+}
+// the css loader
+exports.css = {
+  test: /\.css$/,
+  loaders: ['style', 'css'],
+  include: PATHS.css
+}
+// The file loader
+exports.font = {
+  test: /\.ttf$/,
+  loaders: ['file']
+}
+// Babel loader
+exports.babel = {
+  test: /\.jsx?$/,
+  exclude: /node_modules/,
+  loaders: ['babel']
+};
+```
+
+And added `.babelrc`
+
+```json
+{
+  "presets": [
+    "es2015",
+    "react"
+  ],
+  "plugins": [
+    "react-hot-loader/babel"
+  ]
+}
+```
+Finally, we also gotta edit `package.json` to include new scripts commands:
+
+```javascript
+"start": "NODE_ENV=development webpack-dev-server",
+ "build": "NODE_ENV=build webpack"
+ ```
+ 

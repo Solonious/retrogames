@@ -26,6 +26,8 @@
     "webpack-validator": "^2.3.0"
   },
   "scripts": {
-    "api": "babel-node server.js"
+    "api": "babel-node server.js",
+    "start": "NODE_ENV=evelopment webpack-dev-server",
+    "build": "NODE_ENV=build webpack"
   }
 }
