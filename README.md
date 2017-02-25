@@ -30,3 +30,154 @@ Add `.babbelrc` file with context
   "presets": ["es2015"]
 }
 ```
+## Server JS
+
+Create the `server.js` file
+
+```javascript
+import express from 'express';
+import bodyParser from 'body-parser';
+import mongoose from 'mongoose';
+import morgan from 'morgan';
+
+// We gotta import our models and routes
+import Game from './app/models/game';
+import { getGames, getGame, postGame, deleteGame } from './app/routes/game';
+
+const app = express(); // Our express server!
+const port = process.env.PORT || 8080;
+
+// DB connection through Mongoose
+const options = {
+  server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
+  replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } }
+}; // Just a bunch of options for the db connection
+mongoose.Promise = global.Promise;
+// Don't forget to substitute it with your connection string
+mongoose.connect('YOUR_MONGO_CONNECTION', options);
+
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+
+// Body parser and Morgan middleware
+app.use(bodyParser.urlencoded({ extended: true}));
+app.use(bodyParser.json());
+app.use(morgan('dev'));
+
+// We tell express where to find static assets
+app.use(express.static(__dirname + '/client/dist'));
+
+// Enable CORS so that we can make HTTP request from webpack-dev-server
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE');
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+// API routes
+app.route('/games')
+  // create a game
+  .post(postGame)
+  // get all the games
+  .get(getGames);
+app.route('/games/:id')
+  // get a single game
+  .get(getGame)
+  // delete a single game
+  .delete(deleteGame);
+
+// ...For all the other requests just sends back the Homepage
+app.route("*").get((req, res) => {
+  res.sendFile('client/dist/index.html', { root: __dirname });
+});
+
+app.listen(port);
+
+console.log(`listening on port ${port}`);
+```
+
+## Game model define
+
+Paste the following code in `/app/modes/game.js:`
+```javascript
+// Dependencies
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+
+// Our schema definition
+const gameSchema = new Schema(
+    {
+        name: String,
+        year: Number,
+        description: String,
+        picture: String,
+        postDate : { type: Date, default: Date.now } // Timestamp
+
+    }
+);
+
+// We export the schema to use it anywhere else
+export default mongoose.model('Game', gameSchema);
+```
+##ROUTES CALLBACKS
+
+Create the `game.js` file in `/client/app/routes` and paste the following code:
+
+```javascript
+// We import our game schema
+import Game from '../models/game';
+
+// Get all the games sorted by postDate
+const getGames = (req, res) => {
+    // Query the db, if no errors send all the games to the client
+    Game.find(null, null, { sort: { postDate : 1 } }, (err, games) => {
+        if (err) {
+            res.send(err);
+        }
+        res.json(games); // Games sent as json
+    });
+}
+
+// Get a single game filtered by ID
+const getGame = (req, res) => {
+    const { id } = req.params;
+    // Query the db for a single game, if no errors send it to the client
+    Game.findById(id, (err, game) => {
+        if (err) {
+            res.send(err);
+        }
+        res.json(game); // Game sent as json
+    });
+}
+
+// Get the body data and create a new Game
+const postGame = (req, res) => {
+  // We assign the game info to a empty game and send a message back if no errors
+  let game = Object.assign(new Game(), req.body);
+  // ...Then we save it into the db
+  game.save(err => {
+    if (err) {
+      res.send(err);
+    }
+    res.json({ message: 'game created' }); // A simple JSON answer to inform the client
+  });
+};
+
+// Delete a game by the given ID
+const deleteGame = (req, res) => {
+// We remove the game by the given id and send a message back if no errors
+  Game.remove(
+    { _id: req.params.id },
+    err => {
+      if (err) {
+        res.send(err);
+      }
+      res.json({ message: 'successfully deleted' }); // A simple JSON answer to inform the client
+    }
+  );
+};
+
+// We export our functions to be used in the server routes
+export { getGames, getGame, postGame, deleteGame };
+```
