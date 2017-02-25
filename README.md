@@ -381,7 +381,7 @@ ReactDOM.render(
 ##Routes
 
 Create `routes.js` in `/client/src` and paste the following code:
-```jsx harmony
+```javascript
 import React from 'react';
 import { Router, Route, hashHistory, IndexRoute } from 'react-router';
 import { Home, Welcome, About, Contact } from './components';
@@ -399,13 +399,19 @@ const routes = (
 
 export default routes;
 ```
+####URL paths structure:
+| Url | Component |
+|---|---|
+| / | Home -> Welcome |
+| /about | Home -> About |
+| /contact | Home -> Contact |
 
 ##Components
 ###Home.jsx
 
 in `/client/src/components` create a file `Home.jsx` and paste the following code:
 
-```jsx harmony
+```javascript
 import React, { PureComponent } from 'react';
 import { Link } from 'react-router';
 
@@ -442,4 +448,3 @@ export default class Home extends PureComponent {
     );
   }
 }
-```
