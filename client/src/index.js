@@ -6,9 +6,8 @@ import ReactDOM from 'react-dom';
 import Routes from './routes';
 
 import '../dist/css/style.css';
-import config from '/config';
 
-filepicker.setKey(config.apiKey);
+filepicker.setKey("A5I5qpNVRAusZb7gyxSiIz");
 
 ReactDOM.render(
 	Routes,

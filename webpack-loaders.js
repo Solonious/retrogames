@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 
 const webpack = require('webpack');
-const PATH = require('./webpack-path');
+const PATHS = require('./webpack-path');
 
-exports.devserver = function(options) {
+exports.devServer = function(options) {
 	return {
 		devServer:{
 			historyApiFallback: true,
@@ -20,18 +20,18 @@ exports.devserver = function(options) {
 			})
 		]
 	};
-};
+}
 
 exports.css = {
 	test: /\.css$/,
 	loaders: ['style', 'css'],
-	include: PATH.css
-};
+	include: PATHS.css
+}
 
 exports.font = {
 	test: /\.ttf$/,
 	loaders: ['file']
-};
+}
 
 exports.babel = {
 	test: /\.jsx?$/,

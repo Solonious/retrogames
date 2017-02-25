@@ -448,3 +448,74 @@ export default class Home extends PureComponent {
     );
   }
 }
+```
+
+###Welcome.jsx
+
+Create the file `Welcome.jsx` in `/client/src/component` and paste the following code:
+
+```javascript
+import React, { PureComponent } from 'react';
+import { Link } from 'react-router';
+
+export default class Welcome extends PureComponent {
+  render () {
+    return (
+      <div className="inner cover">
+        <h1 className="cover-heading">Welcome</h1>
+        <p className="lead">Click on browse to start your journey into the wiki of games that made history.</p>
+        <p className="lead">
+          <Link className="btn btn-lg" to="/games">Browse!</Link>
+        </p>
+      </div>
+    );
+  }
+}
+```
+
+###About.jsx
+Create `About.jsx` in `/client/src/components` and paste the following code:
+
+````javascript
+import React, { PureComponent } from 'react';
+
+export default class About extends PureComponent {
+  render () {
+    return (
+      <div className="inner cover">
+        <h1 className="cover-heading">Javascript Everywhere</h1>
+        <p className="lead">This archive is made with Node.js and React. The two communicate through async HTTP requests handled by Redux-saga... Yes we love Redux here!</p>
+      </div>
+    );
+  }
+}
+````
+###Contact.jsx
+
+Create `Contact.jsx` in `/client/src/components` and paste the following code:
+
+````javascript
+import React, { PureComponent } from 'react';
+
+export default class About extends PureComponent {
+  render () {
+    return (
+      <div className="inner cover">
+        <h1 className="cover-heading">Any Questions?</h1>
+        <p className="lead">Don't hesitate to contact me: zaza.samuele@gmail.com</p>
+      </div>
+    );
+  }
+}
+````
+###/components/index.js
+
+````javascript
+import About from './About';
+import Contact from './Contact';
+import Home from './Home';
+import Welcome from './Welcome';
+
+// We export all the components at once
+export { About, Contact, Home, Welcome };
+````

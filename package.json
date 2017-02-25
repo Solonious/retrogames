@@ -23,14 +23,14 @@
     "file-loader": "^0.10.0",
     "react-hot-loader": "3.0.0-beta.6",
     "style-loader": "^0.13.2",
-    "webpack": "^2.2.1",
-    "webpack-dev-server": "^2.4.1",
-    "webpack-merge": "^3.0.0",
-    "webpack-validator": "^2.3.0"
+    "webpack": "^1.13.3",
+    "webpack-dev-server": "^1.16.2",
+    "webpack-merge": "^1.0.2",
+    "webpack-validator": "^2.2.9"
   },
   "scripts": {
     "api": "babel-node server.js",
-    "start": "NODE_ENV=evelopment webpack-dev-server",
+    "start": "NODE_ENV=development webpack-dev-server",
     "build": "NODE_ENV=build webpack"
   }
 }
