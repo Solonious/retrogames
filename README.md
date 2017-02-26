@@ -1,3 +1,5 @@
+[Tutorial](https://scotch.io/tutorials/retrogames-library-with-node-react-and-redux-1-server-api-and-react-frontend#filestack)
+
 ## Create route table
 ###Routes Table
 | route | result |
@@ -405,6 +407,10 @@ export default routes;
 | / | Home -> Welcome |
 | /about | Home -> About |
 | /contact | Home -> Contact |
+| /games   | Archive -> GamesContainer |
+| /games/add | Archive -> AddGameContainer |
+
+
 
 ##Components
 ###Home.jsx
@@ -518,4 +524,246 @@ import Welcome from './Welcome';
 
 // We export all the components at once
 export { About, Contact, Home, Welcome };
+````
+###/containers/index.js
+
+Create it in `/client/src/containers` and paste the following code:
+
+````javascript
+import AddGameContainer from './AddGameContainer';
+import GamesContainer from './GamesContainer';
+
+// We export all the containers at once
+export {
+  AddGameContainer,
+  GamesContainer
+};
+````
+
+###Archive.jsx
+
+Create `Archive.jsx` in `/client/src/components` and paste the following code:
+
+````javascript
+import React, { PureComponent } from 'react';
+import { Link } from 'react-router';
+
+export default class Layout extends PureComponent {
+  render () {
+    return (
+      <div className="view">
+        <nav className="navbar navbar-inverse">
+          <div className="container">
+            <div className="navbar-header">
+              <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span className="sr-only">Toggle navigation</span>
+                <span className="icon-bar" />
+                <span className="icon-bar" />
+                <span className="icon-bar" />
+              </button>
+              <Link className="navbar-brand" to="/">
+                <img src="https://cdn.filestackcontent.com/nLnmrZQaRpeythR4ezUo" className="header-logo" />
+              </Link>
+            </div>
+          </div>
+        </nav>
+        {this.props.children}
+        <footer className="text-center">
+          <p>© 2016 Samuele Zaza</p>
+        </footer>
+      </div>
+    );
+  }
+}
+````
+###GamesContainer.jsx
+
+Create `GamesContainer.jsx` in `/client/src/containers` and paste the following code:
+
+````javascript
+import React, { Component } from 'react';
+import { Modal, GamesListManager } from '../components';
+
+export default class GamesContainer extends Component {
+  constructor (props) {
+    super(props);
+    // The initial state
+    this.state = { games: [], selectedGame: {}, searchBar: '' };
+    // Bind the functions to this (context) 
+    this.toggleModal = this.toggleModal.bind(this);
+    this.deleteGame = this.deleteGame.bind(this);
+    this.setSearchBar = this.setSearchBar.bind(this);
+  }
+
+  // Once the component mounted it fetches the data from the server
+  componentDidMount () {
+    this.getGames();
+  }
+
+  toggleModal (index) {
+    this.setState({ selectedGame: this.state.games[index] });
+    // Since we included bootstrap we can show our modal through its syntax
+    $('#game-modal').modal();
+  }
+
+  getGames () {
+    fetch('http://localhost:8080/games', {
+      headers: new Headers({
+        'Content-Type': 'application/json'
+      })
+    })
+    .then(response => response.json()) // The json response to object literal
+    .then(data => this.setState({ games: data }));
+  }
+
+  deleteGame (id) {
+    fetch(`http://localhost:8080/games/${id}`, {
+      headers: new Headers({
+        'Content-Type': 'application/json',
+      }),
+      method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(response => {
+      // The game is also removed from the state thanks to the filter function
+      this.setState({ games: this.state.games.filter(game => game._id !== id) }); 
+      console.log(response.message);
+    });
+  }
+
+  setSearchBar (event) { 
+    // Super still filters super mario thanks to toLowerCase
+    this.setState({ searchBar: event.target.value.toLowerCase() });
+  }
+
+  render () {
+    const { games, selectedGame, searchBar } = this.state;
+    return (
+      <div>
+        <Modal game={selectedGame} />
+        <GamesListManager
+          games={games}
+          searchBar={searchBar}
+          setSearchBar={this.setSearchBar}
+          toggleModal={this.toggleModal}
+          deleteGame={this.deleteGame}
+        />
+      </div>
+    );
+  }
+}
+````
+
+###Modal.jsx
+`/client/src/components` and paste the following code:
+
+````javascript
+import React, { PureComponent } from 'react';
+
+export default class Modal extends PureComponent {
+  render () {
+    const { _id, img, name, description, year, picture } = this.props.game;
+    return(
+      <div className="modal fade" id="game-modal" tabIndex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+              <h4 className="modal-title" id="myModalLabel">{`${name} (${year})`}</h4>
+            </div>
+            <div className="modal-body">
+              <div>
+                <img src={picture} className="img-responsive img-big" />
+              </div>
+              <hr />
+              <p>{description}</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-warning" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+````
+###GamesListManager.jsx
+   
+Create it in `/client/src/components` and paste the following code:
+
+````javascript
+import React, { PureComponent } from 'react';
+import { Link } from 'react-router';
+import Game from './Game';
+
+export default class GamesListManager extends PureComponent {
+  render () {
+    const { games, searchBar, setSearchBar, toggleModal, deleteGame } = this.props;
+    return (
+
+      <div className="container scrollable">
+        <div className="row text-left">
+          <Link to="/games/add" className="btn btn-danger">Add a new Game!</Link>
+        </div>
+        <div className="row">
+          <input
+            type="search" placeholder="Search by Name" className="form-control search-bar" onKeyUp={setSearchBar} />
+        </div>
+        <div className="row">
+        {
+    // A Game is only shown if its name contains the string from the searchBar
+          games
+            .filter(game => game.name.toLowerCase().includes(searchBar))
+            .map((game, i) => {
+              return (
+                <Game  {...game}
+                  key={game._id}
+                  i={i}
+                  toggleModal={toggleModal}
+                  deleteGame={deleteGame}
+                />
+              );
+            })
+        }
+        </div>
+        <hr />
+      </div>
+
+    );
+  }
+}
+````
+###Game.jsx
+
+`/client/src/components` and paste the following code:
+
+````javascript
+import React, { PureComponent } from 'react';
+import { Link } from 'react-router';
+
+export default class Game extends PureComponent {
+  render () {
+    const { _id, i, name, description, picture, toggleModal, deleteGame } = this.props;
+    return (
+      <div className="col-md-4">
+        <div className="thumbnail">
+          <div className="thumbnail-frame">
+            <img src={picture} alt="..." className="img-responsive thumbnail-pic" />
+          </div>
+          <div className="caption">
+            <h5>{name}</h5>
+            <p className="description-thumbnail">{`${description.substring(0, 150)}...`}</p>
+            <div className="btn-group" role="group" aria-label="...">
+              <button className="btn btn-success" role="button" onClick={() => toggleModal(i)}>View</button>
+              <button className="btn btn-danger" role="button" onClick={() => deleteGame(_id)}>Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
 ````
