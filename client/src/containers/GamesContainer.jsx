@@ -1,63 +1,73 @@
-import React from 'react';
-import { Modal, GamesListManager } from '../components';
+import React, { Component } from 'react';
+import { Modal, GameListManager } from '../components';
 
-export default class GamesContainer extends React.Component {
-	constructor(props) {
+class GamesContainer extends Component {
+	constructor (props) {
 		super(props);
-		this.state = {
-			games: [],
-			selectedGame: {},
-			searchBar: ''
-		};
+		// The initial state
+		this.state = { games: [], selectedGame: {}, searchBar: '' };
+		// Bind the functions to this (context)
 		this.toggleModal = this.toggleModal.bind(this);
 		this.deleteGame = this.deleteGame.bind(this);
 		this.setSearchBar = this.setSearchBar.bind(this);
 	}
-	componentDidMount() {
+
+	// Once the component mounted it fetches the data from the server
+	componentDidMount () {
 		this.getGames();
 	}
-	toggleModal(index) {
-		this.setState({selectedGame: this.state.games[index]});
+
+	toggleModal (index) {
+		this.setState({ selectedGame: this.state.games[index] });
+		// Since we included bootstrap we can show our modal through its syntax
 		$('#game-modal').modal();
 	}
-	getGames() {
-		fetch('http://localhost:8080/games',{
+
+	getGames () {
+		fetch('http://localhost:8080/games', {
 			headers: new Headers({
 				'Content-Type': 'application/json'
 			})
 		})
-			.then(res => res.json())
-			.then(data => this.setState({games: data}));
+			.then(response => response.json()) // The json response to object literal
+			.then(data => this.setState({ games: data }));
 	}
-	deleteGame(id) {
+
+	deleteGame (id) {
 		fetch(`http://localhost:8080/games/${id}`, {
 			headers: new Headers({
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
 			}),
 			method: 'DELETE',
 		})
-			.then(res => res.json())
-			.then(res => {
-				this.setState({ games: this.setState.games.filter(game => game._id !== id)});
-				console.log(res.message);
-			})
+			.then(response => response.json())
+			.then(response => {
+				// The game is also removed from the state thanks to the filter function
+				this.setState({ games: this.state.games.filter(game => game._id !== id) });
+				console.log(response.message);
+			});
 	}
-	setSearchBar(e) {
-		this.setState({searchBar: e.target.value.toLocaleLowerCase()});
+
+	setSearchBar (event) {
+		// Super still filters super mario thanks to toLowerCase
+		this.setState({ searchBar: event.target.value.toLowerCase() });
 	}
-	render() {
+
+	render () {
 		const { games, selectedGame, searchBar } = this.state;
 		return (
 			<div>
-				<Modal game={selectedGame}/>
-				<GamesListManager
+				<Modal game={selectedGame} />
+				<GameListManager
 					games={games}
 					searchBar={searchBar}
-				  setSearchBar={this.setSearchBar}
-				  toggleModal={this.toggleModal}
-				  deleteGame={this.deleteGame}
+					setSearchBar={this.setSearchBar}
+					toggleModal={this.toggleModal}
+					deleteGame={this.deleteGame}
 				/>
 			</div>
 		);
 	}
 }
+
+export default GamesContainer;

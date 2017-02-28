@@ -767,3 +767,128 @@ export default class Game extends PureComponent {
   }
 }
 ````
+
+###AddGameContainer.jsx
+
+Create the `AddGameContainer.jsx` in `/client/src/containers` and paste the following code:
+
+````javascript
+import React, { Component } from 'react';
+import { hashHistory } from 'react-router';
+import { Form } from '../components';
+
+export default class AddGameContainer extends Component {
+  constructor (props) {
+    super(props);
+    // Initial state
+    this.state = { newGame: {}};
+    // Bind this (context) to the functions to be passed down to the children components
+    this.submit = this.submit.bind(this);
+    this.uploadPicture = this.uploadPicture.bind(this);
+    this.setGame = this.setGame.bind(this);
+  }
+  submit () {
+    // We create the newGame object to be posted to the server
+    const newGame = Object.assign({}, { picture: $('#picture').attr('src') }, this.state.newGame);
+    fetch('http://localhost:8080/games', {
+      headers: new Headers({
+        'Content-Type': 'application/json'
+      }),
+      method: 'POST',
+      body: JSON.stringify(newGame)
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data.message);
+      // We go back to the games list view
+      hashHistory.push('/games');
+    });
+  }
+  uploadPicture () {
+    filepicker.pick (
+      {
+        mimetype: 'image/*', // Cannot upload other files but images
+        container: 'modal',
+        services: ['COMPUTER', 'FACEBOOK', 'INSTAGRAM', 'URL', 'IMGUR', 'PICASA'],
+        openTo: 'COMPUTER' // First choice to upload files from
+      },
+      function (Blob) {
+        console.log(JSON.stringify(Blob));
+        $('#picture').attr('src', Blob.url);
+      },
+      function (FPError) {
+        console.log(FPError.toString());
+      }
+    );
+  }
+  // We make sure to keep the state up-to-date to the latest input values
+  setGame () {
+    const newGame = {
+      name: document.getElementById('name').value,
+      description: document.getElementById('description').value,
+      year: document.getElementById('year').value,
+      picture: $('#picture').attr('src')
+    };
+    this.setState({ newGame });
+  }
+  render () {
+    return <Form submit={this.submit} uploadPicture={this.uploadPicture} setGame={this.setGame} />
+  }
+}
+````
+###Form.jsx
+
+Create it in `/client/src/components` (used to it yet?!) and paste the following code:
+````javascript
+import React, { PureComponent } from 'react';
+import { Link } from 'react-router';
+
+export default class Form extends PureComponent {
+  render () {
+    return (
+      <div className="row scrollable">
+    <div className="col-md-offset-2 col-md-8">
+        <div className="text-left">
+        <Link to="/games" className="btn btn-info">Back</Link>
+        </div>
+        <div className="panel panel-default">
+            <div className="panel-heading">
+                <h2 className="panel-title text-center">
+                Add a Game!
+                </h2>
+            </div>
+            <div className="panel-body">
+                <form name="product-form" action="" onSubmit={() => this.props.submit()} noValidate>
+                <div className="form-group text-left">
+                      <label htmlFor="caption">Name</label>
+                      <input id="name" type="text" className="form-control" placeholder="Enter the title" onChange={() => this.props.setGame()} />
+                </div>
+                <div className="form-group text-left">
+                      <label htmlFor="description">Description</label>
+                      <textarea id="description" type="text" className="form-control" placeholder="Enter the description" rows="5" onChange={() => this.props.setGame()} ></textarea>
+                </div>
+                <div className="form-group text-left">
+                    <label htmlFor="price">Year</label>
+                    <input id="year" type="number" className="form-control" placeholder="Enter the year" onChange={() => this.props.setGame()} />
+                </div>
+                <div className="form-group text-left">
+                    <label htmlFor="picture">Picture</label>
+                       <div className="text-center dropup">
+                            <button id="button-upload" type="button" className="btn btn-danger" onClick={() => this.props.uploadPicture()}>
+                              Upload <span className="caret" />
+                            </button>
+                        </div>
+                </div>
+                <div className="form-group text-center">
+                    <img id="picture" className="img-responsive img-upload" />
+                </div>
+                <button type="submit" className="btn btn-submit btn-block">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+    );
+  }
+}
+````
